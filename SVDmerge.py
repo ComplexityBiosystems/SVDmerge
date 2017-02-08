@@ -89,14 +89,22 @@ def onestep_filter(geno=None,pheno=None,column=None,verbose=False):
 
 
 
-def plot_pca_2d(geno=None,pheno=None,column=None,figsize=(6,5),x_axis="pca0",y_axis="pca1",two_colors=["green","red"],verbose=False):
+def plot_pca_2d(geno=None,pheno=None,column=None,
+                figsize=(6,5),
+                x_axis="pca0",y_axis="pca1",
+                two_colors=["green","red"],
+                verbose=False,
+                ax=None,
+                legend=True
+                ):
     """
     Plot the projection onto two principal components,colored by column.
     """
-    # CHECKS
+    
+    # Checks
     check_data_integrity(geno=geno,pheno=pheno,column=column,verbose=verbose,plot_only=True)    
 
-    # create pca dataframe
+    # PCA dataframe
     pca = PCA(whiten=True).fit(geno)
     geno_pca = pd.DataFrame(
         data = pca.transform(geno),
@@ -104,6 +112,7 @@ def plot_pca_2d(geno=None,pheno=None,column=None,figsize=(6,5),x_axis="pca0",y_a
         columns = ["pca"+str(i) for i in range(min(geno.shape))],
         )
  
+    # Colors
     n_groups = np.unique(pheno[column]).shape[0]
     if n_groups ==2:
         colors = two_colors
@@ -112,15 +121,22 @@ def plot_pca_2d(geno=None,pheno=None,column=None,figsize=(6,5),x_axis="pca0",y_a
             colors = sns.color_palette(n_colors=n_groups)
         else:
             colors = sns.color_palette(palette="Dark2",n_colors=n_groups+1)
-    #plt.figure(figsize=figsize)
     
+    # Create axis if not given
+    if ax is None:
+        fig,ax = plt.subplots(1,1,figsize=figsize)
+    
+    # Scatter plots
     for i,(lab,df) in enumerate(geno_pca.groupby(pheno[column])):
-        plt.scatter(df[x_axis],df[y_axis],label=lab,color=colors[i])
-    plt.legend(loc=(1,0),fontsize=14)
-    plt.xticks(size=14)
-    plt.yticks(size=14)
-    plt.xlabel(x_axis.upper(),fontsize=14)
-    plt.ylabel(y_axis.upper(),fontsize=14)
+        ax.scatter(df[x_axis],df[y_axis],label=lab,color=colors[i])
+
+    # Legend
+    if legend:
+        ax.legend(loc=(1,0),fontsize=14)
+    
+    # Big capital labels
+    ax.set_xlabel(x_axis.upper(),fontsize=14)
+    ax.set_ylabel(y_axis.upper(),fontsize=14)
 
 def pca_df(df):
     """
@@ -146,13 +162,13 @@ def twostep_filter(geno_list=None,pheno_list=None,column=None,verbose=False):
     # First filter batch by batch
     genos_1f = []
     for geno,pheno in zip(geno_list,pheno_list):
-        g =onestep_filter(geno=geno,pheno=pheno,column=column,verbose=verbose,extra_kill=extra_kill,kill_all = kill_all)
+        g =onestep_filter(geno=geno,pheno=pheno,column=column,verbose=verbose)
         genos_1f.append(g)
 
     # merge batches
     geno_1f = pd.concat(genos_1f,join="inner")
     pheno = pd.concat(pheno_list,join="inner")
 
-    return onestep_filter( geno = geno_1f , pheno = pheno , column = column , verbose = verbose , extra_kill = extra_kill, kill_all = False)
+    return onestep_filter( geno = geno_1f , pheno = pheno , column = column , verbose = verbose)
 
 
