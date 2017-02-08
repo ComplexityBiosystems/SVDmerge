@@ -146,13 +146,13 @@ def twostep_filter(geno_list=None,pheno_list=None,column=None,verbose=False):
     # First filter batch by batch
     genos_1f = []
     for geno,pheno in zip(geno_list,pheno_list):
-        g =onestep_filter(geno=geno,pheno=pheno,column=column,verbose=verbose,extra_kill=extra_kill,kill_all = kill_all)
+        g =onestep_filter(geno=geno,pheno=pheno,column=column,verbose=verbose)
         genos_1f.append(g)
 
     # merge batches
     geno_1f = pd.concat(genos_1f,join="inner")
     pheno = pd.concat(pheno_list,join="inner")
 
-    return onestep_filter( geno = geno_1f , pheno = pheno , column = column , verbose = verbose , extra_kill = extra_kill, kill_all = False)
+    return onestep_filter( geno = geno_1f , pheno = pheno , column = column , verbose = verbose)
 
 
