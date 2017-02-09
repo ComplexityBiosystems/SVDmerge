@@ -55,7 +55,7 @@ def onestep_filter(geno=None,pheno=None,column=None,verbose=False):
     lab1,lab2 = np.unique(pheno[column].values)
 
     # Create PCA dataframe
-    pca = PCA(whiten=False).fit(geno)
+    pca = PCA(whiten=True).fit(geno)
     geno_pca = pd.DataFrame(
         data = pca.transform(geno),
         index = geno.index,
@@ -93,9 +93,11 @@ def plot_pca_2d(geno=None,pheno=None,column=None,
                 figsize=(6,5),
                 x_axis="pca0",y_axis="pca1",
                 two_colors=["green","red"],
+                colors = None,
                 verbose=False,
                 ax=None,
-                legend=True
+                legend=True,
+                **kwargs
                 ):
     """
     Plot the projection onto two principal components,colored by column.
@@ -116,19 +118,21 @@ def plot_pca_2d(geno=None,pheno=None,column=None,
     n_groups = np.unique(pheno[column]).shape[0]
     if n_groups ==2:
         colors = two_colors
-    else:
+    elif colors is None:
         if n_groups<=6:
             colors = sns.color_palette(n_colors=n_groups)
         else:
             colors = sns.color_palette(palette="Dark2",n_colors=n_groups+1)
-    
+    else:
+        assert len(colors)==n_groups
+
     # Create axis if not given
     if ax is None:
         fig,ax = plt.subplots(1,1,figsize=figsize)
     
     # Scatter plots
     for i,(lab,df) in enumerate(geno_pca.groupby(pheno[column])):
-        ax.scatter(df[x_axis],df[y_axis],label=lab,color=colors[i])
+        ax.scatter(df[x_axis],df[y_axis],label=lab,color=colors[i],**kwargs)
 
     # Legend
     if legend:
@@ -138,15 +142,6 @@ def plot_pca_2d(geno=None,pheno=None,column=None,
     ax.set_xlabel(x_axis.upper(),fontsize=14)
     ax.set_ylabel(y_axis.upper(),fontsize=14)
 
-def pca_df(df):
-    """
-    I AM NOT USING THIS FUNCTION AT ALL ...
-    """
-    return pd.DataFrame(
-        data = PCA(whiten=True).fit_transform(df),
-        index = df.index,
-        columns = ["pca"+str(i) for i in range(min(df.shape))]
-    )
 
 def twostep_filter(geno_list=None,pheno_list=None,column=None,verbose=False):
     """
