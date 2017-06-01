@@ -167,3 +167,13 @@ def twostep_filter(geno_list=None,pheno_list=None,column=None,verbose=False):
     return onestep_filter( geno = geno_1f , pheno = pheno , column = column , verbose = verbose)
 
 
+def pca_df(df):
+    """
+    """
+    return pd.DataFrame(
+        data = PCA(whiten=True).fit_transform(df),
+        index = df.index,
+        columns = ["pca"+str(i) for i in range(min(df.shape))]
+    )
+
+
