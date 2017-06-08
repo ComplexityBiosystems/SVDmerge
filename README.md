@@ -6,7 +6,7 @@ A python module implementing *SVDmerge*, a batch effects removal method develope
 The method is based on singualar value decomposition and uses two-step filtering.
 It is descrived in detail in [insert link to obesity paper](link to obesity papoer),
 where we used it for the first time to merge 4 batches of adipose tissue transcriptomic data
-from lean and obese patients. A series of example notebooks for that case can be found [here](link).
+from lean and obese patients. A series of example notebooks for that case can be found [here](https://github.com/ComplexityBiosystems/obesity-score).
 
 ### Installation
 
