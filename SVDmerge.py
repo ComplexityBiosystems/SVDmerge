@@ -36,7 +36,7 @@ def check_data_integrity(geno=None,pheno=None,column=None,verbose=False,plot_onl
     # If not plotting, check that column has only two unique labels
     if plot_only is False:
         if np.unique(pheno[column]).shape[0]!=2:
-            raise NameError("Column %s in pheno must contain exactly two unique labels")
+            raise NameError("Column '%s' in pheno must contain exactly two unique labels" % column)
 
 
 
@@ -75,6 +75,7 @@ def onestep_filter(geno=None,pheno=None,column=None,verbose=False):
         if min_pval_col>1: print "The first %d principal components where set to zero"%min_pval_col
         if min_pval_col==1: print "The first principal component was set to zero"
         if min_pval_col==0: print "No principal components where set to zero"
+        print ""
 
     # set first min_pval_col components to zero
     geno_pca.iloc[:,:min_pval_col] = 0
@@ -156,11 +157,15 @@ def twostep_filter(geno_list=None,pheno_list=None,column=None,verbose=False):
     """
     # First filter batch by batch
     genos_1f = []
-    for geno,pheno in zip(geno_list,pheno_list):
+    for i,(geno,pheno) in enumerate(zip(geno_list,pheno_list)):
+        if verbose:
+            print "Processing batch %d..." % i 
         g =onestep_filter(geno=geno,pheno=pheno,column=column,verbose=verbose)
         genos_1f.append(g)
 
     # merge batches
+    if verbose:
+        print "Merging batches..."
     geno_1f = pd.concat(genos_1f,join="inner")
     pheno = pd.concat(pheno_list,join="inner")
 
