@@ -8,7 +8,7 @@ It is descrived in detail in
 
 Francesc Font-Clos, Stefano Zapperi, Caterina A. M. La Porta  
 Integrative analysis of pathway deregulation in obesity  
-*npj Systems Biology and Applications (3) 18, 2017  
+*npj Systems Biology and Applications (3) 18, 2017*  
 [link tou journal](https://www.nature.com/articles/s41540-017-0018-z)  
 
 where we used it for the first time to merge 4 batches of adipose tissue transcriptomic data
