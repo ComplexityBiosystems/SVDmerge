@@ -71,64 +71,15 @@ def check_data_integrity(
         if np.unique(meta[column]).shape[0]!=2:
             raise ValueError("Column '%s' in 'meta' must contain exactly two unique labels" % column)
 
-
-
-def onestep_filter(expr=None,meta=None,column=None,verbose=False):
-    """
-    Perform a single SVD filtering step.
-
-    Parameters
-    ----------
-    expr : pandas.DataFrame
-        gene-expression matrix (samples in rows, genes in columns).
-    meta: pandas.DataFrame
-        metadata matrix (clinical data, samples in rows, features in columns).
-    colum: str
-        column of 'meta' used to group samples.
-
+def pca_df(df):
     """
 
-    # Check data integrity
-    check_data_integrity(expr=expr,meta=meta,column=column,verbose=verbose)    
-
-    # Create groups
-    lab1,lab2 = np.unique(meta[column].values)
-
-    # Create PCA dataframe
-    pca = PCA(whiten=True).fit(expr)
-    expr_pca = pd.DataFrame(
-        data = pca.transform(expr),
-        index = expr.index,
-        columns = ["pca"+str(i) for i in range(min(expr.shape))],
-        )
-    
-    # Compute Kolmogorov-Smirnov tests
-    pvals =  ([ks_2samp(
-        expr_pca.loc[meta[column]==lab1,pca_col],
-        expr_pca.loc[meta[column]==lab2,pca_col]
-        ).pvalue for pca_col in expr_pca.columns ])
-
-    min_pval_col = np.argmin(np.array(pvals))    
-
-
-    if verbose:
-        if min_pval_col>1: print "The first %d principal components where set to zero"%min_pval_col
-        if min_pval_col==1: print "The first principal component was set to zero"
-        if min_pval_col==0: print "No principal components where set to zero"
-        print ""
-
-    # set first min_pval_col components to zero
-    expr_pca.iloc[:,:min_pval_col] = 0
-
-    
-    # return values in dataframe
+    """
     return pd.DataFrame(
-        data = pca.inverse_transform(expr_pca.values),
-        index = expr.index,
-        columns = expr.columns 
-        )
-
-
+        data = PCA(whiten=True).fit_transform(df),
+        index = df.index,
+        columns = ["pca"+str(i) for i in range(min(df.shape))]
+    )
 
 def plot_pca_2d(
     expr=None,
@@ -227,6 +178,60 @@ def plot_pca_2d(
     ax.set_xlabel(x_axis.upper(),fontsize=14)
     ax.set_ylabel(y_axis.upper(),fontsize=14)
 
+def onestep_filter(expr=None,meta=None,column=None,verbose=False):
+    """
+    Perform a single SVD filtering step.
+
+    Parameters
+    ----------
+    expr : pandas.DataFrame
+        gene-expression matrix (samples in rows, genes in columns).
+    meta: pandas.DataFrame
+        metadata matrix (clinical data, samples in rows, features in columns).
+    colum: str
+        column of 'meta' used to group samples.
+
+    """
+
+    # Check data integrity
+    check_data_integrity(expr=expr,meta=meta,column=column,verbose=verbose)    
+
+    # Create groups
+    lab1,lab2 = np.unique(meta[column].values)
+
+    # Create PCA dataframe
+    pca = PCA(whiten=True).fit(expr)
+    expr_pca = pd.DataFrame(
+        data = pca.transform(expr),
+        index = expr.index,
+        columns = ["pca"+str(i) for i in range(min(expr.shape))],
+        )
+    
+    # Compute Kolmogorov-Smirnov tests
+    pvals =  ([ks_2samp(
+        expr_pca.loc[meta[column]==lab1,pca_col],
+        expr_pca.loc[meta[column]==lab2,pca_col]
+        ).pvalue for pca_col in expr_pca.columns ])
+
+    min_pval_col = np.argmin(np.array(pvals))    
+
+
+    if verbose:
+        if min_pval_col>1: print "The first %d principal components where set to zero"%min_pval_col
+        if min_pval_col==1: print "The first principal component was set to zero"
+        if min_pval_col==0: print "No principal components where set to zero"
+        print ""
+
+    # set first min_pval_col components to zero
+    expr_pca.iloc[:,:min_pval_col] = 0
+
+    
+    # return values in dataframe
+    return pd.DataFrame(
+        data = pca.inverse_transform(expr_pca.values),
+        index = expr.index,
+        columns = expr.columns 
+        )
 
 def twostep_filter(expr_list=None,meta_list=None,column=None,verbose=False):
     """
@@ -291,14 +296,5 @@ def twostep_filter(expr_list=None,meta_list=None,column=None,verbose=False):
     return onestep_filter( expr = expr_1f , meta = meta , column = column , verbose = verbose)
 
 
-def pca_df(df):
-    """
-
-    """
-    return pd.DataFrame(
-        data = PCA(whiten=True).fit_transform(df),
-        index = df.index,
-        columns = ["pca"+str(i) for i in range(min(df.shape))]
-    )
 
 
