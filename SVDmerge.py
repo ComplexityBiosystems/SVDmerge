@@ -1,3 +1,9 @@
+"""
+SVDmerge: a spectral method to remove batch effects.
+
+Francesc Font-Clos
+Nov 2018
+"""
 from __future__ import print_function
 import numpy as np
 import pandas as pd
@@ -207,7 +213,6 @@ def onestep_filter(expr=None, meta=None, column=None, verbose=False):
         column of 'meta' used to group samples.
 
     """
-
     # Check data integrity
     check_data_integrity(expr=expr, meta=meta, column=column, verbose=verbose)
 
@@ -232,7 +237,8 @@ def onestep_filter(expr=None, meta=None, column=None, verbose=False):
 
     if verbose:
         if min_pval_col > 1:
-            print("The first %d principal components where set to zero" % min_pval_col)
+            print("The first %d principal components where set to zero" %
+                  min_pval_col)
         if min_pval_col == 1:
             print("The first principal component was set to zero")
         if min_pval_col == 0:
@@ -290,10 +296,10 @@ def twostep_filter(expr_list=None, meta_list=None, column=None, verbose=False):
     >
     > # concatenate the metadata
     > meta = pd.concat([meta1,meta2,meta3])
-    > 
+    >
     > # plot
     > SVDmerge.plot_pca_2d(expr=expr, meta=meta, column="state")
-    > 
+    >
     ```
     """
     # First filter batch by batch
@@ -311,4 +317,8 @@ def twostep_filter(expr_list=None, meta_list=None, column=None, verbose=False):
     expr_1f = pd.concat(exprs_1f, join="inner")
     meta = pd.concat(meta_list, join="inner")
 
-    return onestep_filter(expr=expr_1f, meta=meta, column=column, verbose=verbose)
+    return onestep_filter(
+        expr=expr_1f,
+        meta=meta,
+        column=column,
+        verbose=verbose)
